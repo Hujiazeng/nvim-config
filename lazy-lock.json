@@ -1,0 +1,12 @@
+{
+  "bufferline.nvim": { "branch": "main", "commit": "64e2c5def50dfd6b6f14d96a45fa3d815a4a1eef" },
+  "dashboard-nvim": { "branch": "master", "commit": "416f12e6f3a9e2f9736f81d641efc8b7c80e33bc" },
+  "everforest": { "branch": "master", "commit": "cbcb08bc1e0cd0d950d7c0fa663b2f6203b7f8e7" },
+  "lazy.nvim": { "branch": "main", "commit": "96584866b9c5e998cbae300594d0ccfd0c464627" },
+  "lualine.nvim": { "branch": "master", "commit": "2248ef254d0a1488a72041cfb45ca9caada6d994" },
+  "nvim-tree.lua": { "branch": "master", "commit": "164f11db4f18a3e0eb3d6719b53f63cabfac7d8b" },
+  "nvim-treesitter": { "branch": "master", "commit": "eb3faef3a44641e5875581e901b0a8df8da2bde4" },
+  "nvim-web-devicons": { "branch": "master", "commit": "a8cf88cbdb5c58e2b658e179c4b2aa997479b3da" },
+  "plenary.nvim": { "branch": "master", "commit": "253d34830709d690f013daf2853a9d21ad7accab" },
+  "telescope.nvim": { "branch": "master", "commit": "6312868392331c9c0f22725041f1ec2bef57c751" }
+}
