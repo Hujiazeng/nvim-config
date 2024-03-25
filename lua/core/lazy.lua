@@ -15,6 +15,11 @@ if not status_ok then return end
   lazy.setup({
       spec = {
 {
+  "folke/which-key.nvim",
+  event = "VeryLazy",
+}
+,{'rcarriga/nvim-notify'}
+,{
   'nvimdev/dashboard-nvim',
   event = 'VimEnter',
   dependencies = { {'nvim-tree/nvim-web-devicons'}}

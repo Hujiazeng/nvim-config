@@ -8,9 +8,12 @@ obj.setup({
 
 defaults = {
     layout_config = {
-      vertical = { width = 0.1 }
-      -- other layout configuration here
-    },
+          horizontal = { prompt_position = "top", preview_width = 0.7 },
+          vertical = { mirror = false },
+          width = 0.87,
+          height = 0.80,
+          preview_cutoff = 120,
+        },
     -- other defaults configuration here
   },
   -- other configuration values here
