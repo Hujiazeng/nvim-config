@@ -10,7 +10,7 @@ vim.g.maplocalleader =  " "
  
 
 -- alt + m 打开或关闭文件浏览器
-vim.keymap.set("n", "<A-m>", ":NvimTreeToggle<CR>", opt) 
+vim.keymap.set("n", "<A-q>", ":NvimTreeToggle<CR>", opt) 
 
 -- 全局搜索
 vim.keymap.set("n", "<C-p>", ":Telescope find_files<CR>", opt) 
