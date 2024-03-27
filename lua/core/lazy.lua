@@ -14,7 +14,9 @@ if not status_ok then return end
 -- Start setup
   lazy.setup({
       spec = {
-{
+   {'mfussenegger/nvim-dap'},
+{"rcarriga/nvim-dap-ui", dependencies = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"}}
+, {
   'nvimdev/dashboard-nvim',
   event = 'VimEnter',
   dependencies = { {'nvim-tree/nvim-web-devicons'}}
