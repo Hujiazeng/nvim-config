@@ -7,79 +7,202 @@ require("keymapping")
 -- 插件
 require("plugins")
 
+-- mason
+local mason = require("mason").setup()
 -- dap
 local dap = require('dap')
 local dapui = require("dapui")
 dapui.setup()
 dap.adapters.python = function(cb, config)
-  if config.request == 'attach' then
-    ---@diagnostic disable-next-line: undefined-field
-    local port = (config.connect or config).port
-    ---@diagnostic disable-next-line: undefined-field
-    local host = (config.connect or config).host or '127.0.0.1'
-    cb({
-      type = 'server',
-      port = assert(port, '`connect.port` is required for a python `attach` configuration'),
-      host = host,
-      options = {
-        source_filetype = 'python',
-      },
-    })
-  else
-    cb({
-      type = 'executable',
-      command = 'H:\\tools\\code\\Miniconda\\envs\\face\\pythonw.exe',
-      args = { '-m', 'debugpy.adapter' },
-      options = {
-        source_filetype = 'python',
-      },
-    })
-  end
+    if config.request == 'attach' then
+        ---@diagnostic disable-next-line: undefined-field
+        local port = (config.connect or config).port
+        ---@diagnostic disable-next-line: undefined-field
+        local host = (config.connect or config).host or '127.0.0.1'
+        cb({
+            type = 'server',
+            port = assert(port, '`connect.port` is required for a python `attach` configuration'),
+            host = host,
+            options = {
+                source_filetype = 'python',
+            },
+        })
+    else
+        cb({
+            type = 'executable',
+            command = 'D:\\game\\env\\Scripts\\pythonw.exe',
+            args = { '-m', 'debugpy.adapter' },
+            options = {
+                source_filetype = 'python',
+            },
+        })
+    end
 end
 dap.configurations.python = {
-  {
-    -- The first three options are required by nvim-dap
-    type = 'python'; -- the type here established the link to the adapter definition: `dap.adapters.python`
-    request = 'launch';
-    name = "Launch file";
+    {
+        -- The first three options are required by nvim-dap
+        type = 'python'; -- the type here established the link to the adapter definition: `dap.adapters.python`
+        request = 'launch';
+        name = "Launch file";
 
-    -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
+        -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
 
-    program = "${file}"; -- This configuration will launch the current file if used.
-    pythonPath = function()
-      -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
-      -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
-      -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
-      local cwd = vim.fn.getcwd()
-      if vim.fn.executable(cwd .. '/venv/bin/python') == 1 then
-        return cwd .. '/venv/bin/python'
-      elseif vim.fn.executable(cwd .. '/.venv/bin/python') == 1 then
-        return cwd .. '/.venv/bin/python'
-      else
-        return 'H:\\tools\\code\\Miniconda\\envs\\face\\pythonw.exe'
-      end
-    end;
-  },
+        program = "${file}"; -- This configuration will launch the current file if used.
+        pythonPath = function()
+            -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+            -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+            -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+            local cwd = vim.fn.getcwd()
+            if vim.fn.executable(cwd .. '/venv/bin/python') == 1 then
+                return cwd .. '/venv/bin/python'
+            elseif vim.fn.executable(cwd .. '/.venv/bin/python') == 1 then
+                return cwd .. '/.venv/bin/python'
+            else
+                return 'D:\\game\\env\\Scripts\\pythonw.exe'
+            end
+        end;
+    },
 }
+
+-- Setup language servers.
+local lspconfig = require('lspconfig')
+lspconfig.pyright.setup {}
+lspconfig.tsserver.setup {}
+lspconfig.rust_analyzer.setup {
+    -- Server-specific settings. See `:help lspconfig-setup`
+    settings = {
+        ['rust-analyzer'] = {},
+    },
+}
+-- Global mappings.
+-- See `:help vim.diagnostic.*` for documentation on any of the below functions
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
+
+-- Use LspAttach autocommand to only map the following keys
+-- after the language server attaches to the current buffer
+vim.api.nvim_create_autocmd('LspAttach', {
+    group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+    callback = function(ev)
+        -- Enable completion triggered by <c-x><c-o>
+        vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+        -- Buffer local mappings.
+        -- See `:help vim.lsp.*` for documentation on any of the below functions
+        local opts = { buffer = ev.buf }
+        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+        vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+        vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
+        vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
+        vim.keymap.set('n', '<space>wl', function()
+            print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+        end, opts)
+        vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+        vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+        vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+        vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+        vim.keymap.set('n', '<space>f', function()
+            vim.lsp.buf.format { async = true }
+        end, opts)
+    end,
+})
+
+
+
+-- Set up nvim-cmp.
+local cmp = require 'cmp'
+
+cmp.setup({
+    snippet = {
+        -- REQUIRED - you must specify a snippet engine
+        expand = function(args)
+            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+            -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+            -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+        end,
+    },
+    window = {
+        -- completion = cmp.config.window.bordered(),
+        -- documentation = cmp.config.window.bordered(),
+    },
+    --mapping = cmp.mapping.preset.insert({
+    --    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    --    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    --    ['<C-Space>'] = cmp.mapping.complete(),
+    --    ['<C-e>'] = cmp.mapping.abort(),
+    --    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    --}),
+    sources = cmp.config.sources({
+        { name = 'nvim_lsp' },
+        { name = 'vsnip' }, -- For vsnip users.
+        -- { name = 'luasnip' }, -- For luasnip users.
+        -- { name = 'ultisnips' }, -- For ultisnips users.
+        -- { name = 'snippy' }, -- For snippy users.
+    }, {
+        { name = 'buffer' },
+    })
+})
+
+---- Set configuration for specific filetype.
+--cmp.setup.filetype('gitcommit', {
+--    sources = cmp.config.sources({
+--        { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
+--    }, {
+--        { name = 'buffer' },
+--    })
+--})
+--
+---- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+--cmp.setup.cmdline({ '/', '?' }, {
+--    mapping = cmp.mapping.preset.cmdline(),
+--    sources = {
+--        { name = 'buffer' }
+--    }
+--})
+--
+---- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+--cmp.setup.cmdline(':', {
+--    mapping = cmp.mapping.preset.cmdline(),
+--    sources = cmp.config.sources({
+--        { name = 'path' }
+--    }, {
+--        { name = 'cmdline' }
+--    }),
+--    matching = { disallow_symbol_nonprefix_matching = false }
+--})
+
+-- Set up lspconfig.
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+-- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
+require('lspconfig')['pyright'].setup {
+    capabilities = capabilities
+}
+
+
+
+
 -- 监听事件自动开关debug
 dap.listeners.before.attach.dapui_config = function()
-  dapui.open()
+    dapui.open()
 end
 dap.listeners.before.launch.dapui_config = function()
-  dapui.open()
+    dapui.open()
 end
 dap.listeners.before.event_terminated.dapui_config = function()
-  dapui.close()
+    dapui.close()
 end
 dap.listeners.before.event_exited.dapui_config = function()
-  dapui.close()
+    dapui.close()
 end
 
-
-
-
-vim.cmd[[colorscheme everforest]]
-
+vim.cmd [[colorscheme everforest]]
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
